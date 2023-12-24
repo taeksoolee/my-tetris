@@ -1,11 +1,14 @@
 const COL_NUM = 15;
 const ROW_NUM = 30;
 const SIZE = 20; // px
-const BORDER_LEN = 1; // px
+const BORDER_LEN = .5; // px
 
 const $board = document.getElementById('board');
 const $nextFigureBoard = document.getElementById('nextFigureBoard');
-const grid = [];
+/**
+ * @type {(0|1|2)[][]}
+ */
+let grid = [];
 
 const initApp = () => {
   $board.style.border = `${BORDER_LEN}px solid lightgray`;
@@ -251,7 +254,6 @@ const figure = [
 
 const getFigure = () => {
   const idx = Math.round(Math.random() * (figure.length-1));
-  console.log(idx);
   return figure[idx];
 };
 
@@ -359,7 +361,33 @@ const setNewFigure = () => {
 
 const activeEndLine = () => {
   attachFigure();
+
+  // 완성된 줄을 지운다.
+  const removedLineIdxs = [];
+
+  grid.forEach((row, rIdx) => {
+    let isRemoveLine = true;
+    for (const value of row) {
+      if (value !== 2) {
+        isRemoveLine = false;
+        break;
+      }
+    }
+    isRemoveLine && removedLineIdxs.push(rIdx);
+  });
+
+  if (removedLineIdxs > 0) {
+    grid = grid.reduce((a, c, idx) => {
+      if (!removedLineIdxs.includes(idx)) {
+        a.push(c);
+      }
+      return a;
+    }, new Array(removedLineIdxs).map(_ => new Array(COL_NUM).fill(0)));
+  }
+  //
+  
   setNewFigure();
+
 }
 
 const run = (isDown=true) => {
